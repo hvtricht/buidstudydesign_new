@@ -1,0 +1,1 @@
+web: gunicorn buildstudydesign.wsgi —-log-file -

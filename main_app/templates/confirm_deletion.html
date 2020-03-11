@@ -1,0 +1,16 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+<link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Study Design - confirm deletion</title>
+	</head>
+	
+	<p>deleted: {{visit.name}}</p>
+	
+	<a href="{% url 'index' %}">
+		Back to home
+	</a>
+</html>

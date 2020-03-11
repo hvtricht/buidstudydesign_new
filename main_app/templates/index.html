@@ -1,0 +1,426 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+<link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Study Design</title>
+	</head>
+	<body>
+	
+	<img id="Visit" style="display:none"
+	src="{% static '/images/dose2.jpg' %}" alt="Visit">
+
+	<img id="sample_bss" style="display:none"
+	src="{% static '/images/bss.png' %}" alt="bss">
+	
+	<img id="sample_bsi" style="display:none"
+	src="{% static '/images/bsi.png' %}" alt="bsi">
+
+	<img id="sample_usp" style="display:none"
+	src="{% static '/images/usp.png' %}" alt="usp">
+	
+	<img id="sample_uss" style="display:none"
+	src="{% static '/images/uss.png' %}" alt="uss">
+	
+	<img id="sample1" style="display:none"
+	src="{% static '/images/sample.png' %}" alt="bss">
+	
+	<img id="sample2" style="display:none"
+	src="{% static '/images/sample2.png' %}" alt="bsi">
+
+	<img id="sample3" style="display:none"
+	src="{% static '/images/sample3.png' %}" alt="usp">
+	
+	<img id="sample4" style="display:none"
+	src="{% static '/images/sample4.png' %}" alt="uss">
+	
+	<img id="sample5" style="display:none"
+	src="{% static '/images/sample.png' %}" alt="uss">
+	
+	<img id="rand" style="display:none"
+	src="{% static '/images/randomization.png' %}" alt="randomization">
+	
+	<img id="review" style="display:none"
+	src="{% static '/images/review.png' %}" alt="review">
+	
+	<p>Study: {% for study in study %} {{study.name}} {% endfor %}</p>
+
+
+	<div class="canvas_container"> 
+	<canvas id="myCanvas" class="canvas__canvas" width="1200" height="297" style="border:1px solid #d3d3d3;">
+	Your browser does not support the HTML5 canvas tag.
+	</canvas>
+	<button onclick="getPngChart();">Get Png</button>
+	</div>
+	<table class="table table-striped table-sm" id="my_study">
+        <thead><B>Study</B>
+            <tr>
+                <th>name</th>
+                <th>Step wise study?</th>
+                <th>Number of steps</th>
+                <th>randyn</th>
+                <th>randq</th>		
+            </tr>
+        </thead>
+        <tbody>
+        {% for study in study %}
+        <tr>
+            <td>{{study.name}}</td>
+            <td>{{study.stepwise}}</td>
+            <td>{{study.no_steps}}</td>
+            <td>{{study.randyn}}</td>
+            <td>{{study.randq}}</td>
+			<td><a href="{% url 'edit_study' pk=study.pk %}"><button class="btn btn-warning">Edit</button></a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+	<a href="{% url 'main_app_new_group' %}">
+		Submit a new group
+	</a>
+	<p></p>
+	<table class="table table-striped table-sm" id="my_study">
+        <thead><B>Applicable Groups</B>
+            <tr>
+                <th>Group Name</th>
+                <th>Group set</th>
+                <th>Number of Participants</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for group in groups %}
+        <tr>
+            <td>{{group.name}}</td>
+            <td>{{group.groupset}}</td>
+            <td>{{group.No_subjects}}</td>
+			<td><a href="{% url 'edit_group' pk=group.pk %}"><button class="btn btn-warning">Edit</button></a></td>
+			<td><a href="{% url 'remove_group' pk=group.pk %}"><button class="btn btn-danger">Delete</button></a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+	<a href="{% url 'main_app_new_sampletp' %}">
+		Submit a new sampletype
+	</a>
+	<p></p>
+	<table class="table table-striped table-sm" id="my_study">
+        <thead><B>Applicable Sampletypes</B>
+            <tr>
+                <th>name</th>
+                <th>full name</th>			
+            </tr>
+        </thead>
+        <tbody>
+        {% for sampletype in sampletypes %}
+        <tr>
+            <td>{{sampletype.name}}</td>
+            <td>{{sampletype.full_name}}</td>
+			<td><a href="{% url 'edit_sampletp' pk=sampletype.pk %}"><button class="btn btn-warning">Edit</button></a></td>
+			<td><a href="{% url 'remove_sampletp' pk=sampletype.pk %}"><button class="btn btn-danger">Delete</button></a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+	<a href="{% url 'main_app_new_visit' %}">
+		Submit a new visit
+	</a>
+	<p></p>
+	<table class="table table-striped table-sm" id="my_visits">
+        <thead><B>Visits</B>
+            <tr>
+				<th>Order</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Timepoint</th>
+                <th>Has Vaccination</th>
+                <th>Group set</th>
+                <th>SampleType</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for visit in visits %}
+        <tr>
+            <td>{{visit.order}}</td>
+            <td>{{visit.type}}</td>
+            <td>{{visit.name}}</td>
+            <td>{{visit.timepoint}}</td>
+            <td>{{visit.has_vac}}</td>
+            <td>{{visit.groupset}}</td>
+            <td>{{ visit.SampleType.all|join:", " }}</td>
+			<td><a href="{% url 'edit_visit' pk=visit.pk %}"><button class="btn btn-warning">Edit</button></a></td>
+			<td><a href="{% url 'remove_visit' pk=visit.pk %}"><button class="btn btn-danger">Delete</button></a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+	<script>
+		window.onload = function() {
+			var canvas = document.getElementById("myCanvas");
+			var xpos_vis = 1000;
+			var xpos_end = xpos_vis +  ({{ visitcount }} * 400);
+			var ystartpos = 0;	
+			
+			/* if study is randomized move the ystartpos down */
+			
+			{% for study in study %}
+				{% if study.randyn == True %}
+					ystartpos = ystartpos + 300;
+				{% endif %}	
+			{% endfor %}
+			
+			/* create sampletypelist array, to be able to loop over the available sampletypes */
+			
+			var sampletypelist = [];
+			
+			{% for sampletype in sampletypes.all %}
+				sampletypelist.push("{{sampletype.name}}");
+			{% endfor %}	
+			
+			/* define the y position for the samples */
+			
+			var samplestartpos = ystartpos + 480;
+			var samplepos2 = samplestartpos + 100;
+			var samplepos3 = samplepos2 + 100;
+			var samplepos4 = samplepos3 + 100;
+			var samplepos5 = samplepos4 + 100;
+			
+			/* define the size of the screen (needs to be properly updated based on the number of sampletypes still */
+			
+			{% for study in study %}
+				canvas.width  = xpos_end;
+				canvas.height = samplepos4 + 200;	
+				canvas.style.width = xpos_end / 4;
+				canvas.style.height = (samplepos4 + 200)  /4;
+			{% endfor %}		
+			
+			/* create the variables for the images */
+						
+			var ctx = canvas.getContext("2d");				
+			var img_vis = document.getElementById("Visit");
+			var img_uss = document.getElementById("sample_uss");
+			var img_bss = document.getElementById("sample_bss");
+			var img_bsi = document.getElementById("sample_bsi");
+			var img_usp = document.getElementById("sample_usp");
+			var img_rand = document.getElementById("rand");
+			var img_review = document.getElementById("review");
+			
+			/* add text that will always be available, independent of the scenario */
+			
+			ctx.font = "80px Arial";
+			ctx.textAlign = "center";
+			ctx.fillText("Visit", 120, ystartpos + 98);
+			ctx.fillText("Day", 120, ystartpos + 200);
+			
+			/* define the sample types at the bottom of the canvas (y location needs to be properly updated based on the number of sampletypes still) */
+			
+			var studysamples = [];
+			var studysamplesfull = [];
+				{% for sampletype in sampletypes.all %}
+					studysamples.push("{{sampletype.name}}");
+					studysamplesfull.push("{{sampletype.full_name}}");
+				{% endfor %}
+			
+			var xposstsamples = 50;
+			var yposstsamples = samplepos4 + 100;
+			
+			console.log(studysamples);
+
+				for (i = 0; i < studysamples.length; i++) {		
+					console.log(studysamples[i]);
+					ctx.drawImage(sample1, xposstsamples, yposstsamples, 186, 109);
+					ctx.font = "30px Arial Black";
+					ctx.textAlign = "left";
+					ctx.fillText(studysamples[i], xposstsamples + 90, yposstsamples +70);
+					ctx.fillText(studysamplesfull[i], xposstsamples + 90, yposstsamples +70);
+					xposstsamples = xposstsamples + 1000;
+				}			
+			
+			/* add text for the group, the location should be dependent on the groupset (to be added still) */
+
+			var ygrouppos = ystartpos + 400;
+	/*		
+{% regroup groups by grouplist as group_list %}
+
+{% for group in group_list %}
+
+		console.log("{{group.list}}");
+        {% for group in group.list %}
+				{% if group.groupset == "1" %}
+					ctx.font = "60px Arial";
+					ctx.textAlign = "left";
+					ctx.fillText("{{ group.name}} (N \u2245 {{ group.No_subjects}})", 120, ygrouppos);
+					ygrouppos = ygrouppos + 75;
+				{% endif %}
+          		console.log("{{group.groupset}}");				
+          		console.log("{{group.name}}");
+        {% endfor %}
+
+{% endfor %}		*/
+	
+				{% for group in groups %}
+					ctx.font = "60px Arial";
+					ctx.textAlign = "left";
+					ctx.fillText("{{ group.name}} (N \u2245 {{ group.No_subjects}})", 120, ygrouppos);
+					
+					ygrouppos = ygrouppos + 75;
+				{% endfor %}	
+		
+
+			
+			{% for visit in visits %}
+				ctx.font = "80px Arial";
+				ctx.textAlign = "center";
+				ctx.fillText("{{ visit.name}}", xpos_vis, ystartpos + 98);
+				ctx.fillText("{{ visit.timepoint}}", xpos_vis, ystartpos + 200);
+
+				{% if visit.has_vac %}
+					ctx.drawImage(img_vis, xpos_vis - 112, ystartpos + 260, 228, 196);
+				{% endif %}
+				
+
+				{% if visit.type|cut:" " != "Visit" %}
+					ctx.drawImage(img_review, xpos_vis - 112, ystartpos + 260, 228, 196);
+					ctx.font = "50px Arial Black";
+					ctx.textAlign = "center";
+					ctx.fillText("{{visit.type|cut:" "}}", xpos_vis, ystartpos + 370);
+					ctx.stroke();
+					ctx.moveTo(xpos_vis - 300, ystartpos + 365);
+					ctx.lineTo(xpos_vis - 100, ystartpos + 365);
+					ctx.lineWidth = 6;
+					ctx.stroke();
+				{% endif %}				
+				
+				
+				<!--loop over the samples applicable for the visit and draw an image for each sampletype-->
+				/*
+				var samples = '{{visit.sample}}'.split(",");
+
+				 for (var i = 0; i < samples.length; i++) {
+					samples[i] = samples[i].trim()
+					}
+
+				var i;
+
+				
+
+				for (i = 0; i < samples.length; i++) {
+					if (samples[i] == 'bsi') {
+				  	ctx.drawImage(sample_bsi, xpos_vis - 88, samplestartpos, 176, 124);
+					}
+
+					if (samples[i] == 'uss') {
+				  	ctx.drawImage(sample_uss, xpos_vis - 88, samplestartpos+100, 176, 124);
+					}
+					
+					if (samples[i] == 'bss') {
+				  	ctx.drawImage(sample_bss, xpos_vis - 88, samplestartpos+200, 176, 124);
+					}
+
+					if (samples[i] == 'usp') {
+				  	ctx.drawImage(sample_usp, xpos_vis - 88, samplestartpos+300, 176, 124);
+					}
+				}	
+				*/
+				/*
+				{% for sampletype in visit.SampleType.all %}
+					{% if sampletype.name == 'bsi' %}
+					ctx.drawImage(sample1, xpos_vis - 88, samplestartpos, 186, 109);
+					ctx.font = "50px Arial Black";
+					ctx.textAlign = "center";
+					ctx.fillText("bsi", xpos_vis, samplestartpos+70);
+					{% endif %}
+					{% if sampletype.name == 'uss' %}
+					ctx.drawImage(sample2, xpos_vis - 88, samplepos2, 186, 109);
+					ctx.font = "50px Arial Black";
+					ctx.textAlign = "center";
+					ctx.fillText("uss", xpos_vis, samplepos2+70);
+					{% endif %}
+					{% if sampletype.name == 'bss' %}
+					ctx.drawImage(sample3, xpos_vis - 88, samplepos3, 186, 109);
+					ctx.font = "50px Arial Black";
+					ctx.textAlign = "center";
+					ctx.fillText("bss", xpos_vis, samplepos3+70);					
+					{% endif %}
+					{% if sampletype.name == 'usp' %}
+					ctx.drawImage(sample4, xpos_vis - 88, samplepos4, 186, 109);
+					ctx.font = "50px Arial Black";
+					ctx.textAlign = "center";
+					ctx.fillText("usp", xpos_vis, samplepos4+70);					
+					{% endif %}
+				{% endfor %}
+				*/
+				
+				var visitsamples = [];
+				{% for sampletype in visit.SampleType.all %}
+					visitsamples.push("{{sampletype.name}}");
+				{% endfor %}
+				
+				for (i = 0; i < visitsamples.length; i++) {		
+					if (visitsamples[i] == sampletypelist[0]) {
+					ctx.drawImage(sample1, xpos_vis - 88, samplestartpos, 186, 109);
+					ctx.font = "50px Arial Black";
+					ctx.textAlign = "center";
+					ctx.fillText(sampletypelist[0], xpos_vis, samplestartpos+70);
+					}
+					if (visitsamples[i] == sampletypelist[1]) {
+					ctx.drawImage(sample2, xpos_vis - 88, samplepos2, 186, 109);
+					ctx.font = "50px Arial Black";
+					ctx.textAlign = "center";
+					ctx.fillText(sampletypelist[1], xpos_vis, samplepos2+70);
+					}
+					if (visitsamples[i] == sampletypelist[2]) {
+					ctx.drawImage(sample3, xpos_vis - 88, samplepos3, 186, 109);
+					ctx.font = "50px Arial Black";
+					ctx.textAlign = "center";
+					ctx.fillText(sampletypelist[2], xpos_vis, samplepos3+70);
+					}
+					if (visitsamples[i] == sampletypelist[3]) {
+					ctx.drawImage(sample4, xpos_vis - 88, samplepos4, 186, 109);
+					ctx.font = "50px Arial Black";
+					ctx.textAlign = "center";
+					ctx.fillText(sampletypelist[3], xpos_vis, samplepos4+70);
+					}
+					if (visitsamples[i] == sampletypelist[4]) {
+					ctx.drawImage(sample5, xpos_vis - 88, samplepos5, 186, 109);
+					ctx.font = "50px Arial Black";
+					ctx.textAlign = "center";
+					ctx.fillText(sampletypelist[4], xpos_vis, samplepos5+70);
+					}
+				}
+				
+				xpos_vis = xpos_vis + 400;
+			{% endfor %}
+			
+			{% for study in study %}
+				{% if study.randyn == True %}
+					ctx.beginPath();
+					ctx.rect(1000 - 180, 20, 360, 140);
+					ctx.stroke();
+					ctx.font = "40px Arial Black";
+					ctx.textAlign = "center";
+					ctx.fillText("Randomization", 1000, 78);
+					ctx.fillText("{{ study.randq}}", 1000, 128);
+					ctx.moveTo(1000, 160);
+					ctx.lineTo(1000, 300);
+					ctx.lineWidth = 6;
+					ctx.stroke();
+				{% endif %}	
+			{% endfor %}
+			
+
+		}
+		function getPngChart() {
+		  var element = document.createElement('a');
+		  element.setAttribute('href', document.getElementById('myCanvas').toDataURL('image/png',1));
+		  element.setAttribute('download', 'chart.png');
+		  element.style.display = 'none';
+		  document.body.appendChild(element);
+		  element.click();
+		  document.body.removeChild(element);
+		}
+		;
+	</script>
+</html>
+

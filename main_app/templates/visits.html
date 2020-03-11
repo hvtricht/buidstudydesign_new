@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}{% endblock title %}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    {% block style %}
+    {% endblock style %}
+</head>
+
+<div class="container-fluid">
+    <table class="table table-striped table-sm" id="my_visits">
+        <thead>
+            <tr>
+                <th>key</th>			
+                <th>Name</th>
+                <th>Timepoint</th>
+                <th>Has Vaccination</th>
+                <th>Sample(s)</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for visit in visits %}
+        <tr>
+			<td>{{visit.pk}}</td>
+            <td>{{visit.name}}</td>
+            <td>{{visit.timepoint}}</td>
+            <td>{{visit.has_vac}}</td>
+            <td>{{visit.sample}}</td>
+			<td><a href="{% url 'visit_detail' pk=visit.pk %}"><button class="btn btn-warning">Edit</button></a></td>
+			<td><a href="{% url 'visit_detail' pk=visit.pk %}"><button class="btn btn-warning">delete</button></a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+	<a href="{% url 'main_app_new_visit' %}">
+		Submit a new visit
+	</a>
+</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script>
+    /*
+        On submiting the form, send the POST ajax
+        request to server and after successfull submission
+        display the object.
+    */
+    $("#visit-form").submit(function (e) {
+        // preventing from page reload and default actions
+        e.preventDefault();
+        // serialize the data for sending the form data.
+        var serializedData = $(this).serialize();
+        // make POST ajax call
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'post_visit' %}",
+            data: serializedData,
+            success: function (response) {
+                // on successfull creating object
+                // 1. clear the form.
+                $("#visit-form").trigger('reset');
+                // 2. focus to nickname input 
+                $("#id_name").focus();
+
+                // display the newly friend to table.
+                var instance = JSON.parse(response["instance"]);
+                var fields = instance[0]["fields"];
+                $("#my_visits tbody").prepend(
+                    `<tr>
+                    <td>${fields["name"]||""}</td>
+                    <td>${fields["timepoint"]||""}</td>
+                    <td>${fields["has_vac"]||""}</td>
+                    <td>${fields["sample"]||""}</td>
+                    </tr>`
+                )
+            },
+            error: function (response) {
+                // alert the error if any error occured
+                alert(response["responseJSON"]["error"]);
+            }
+        })
+    })
+</script>
+</body>
+
+</html>

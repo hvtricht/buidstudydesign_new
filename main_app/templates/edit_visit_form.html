@@ -1,0 +1,21 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+<link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Study Design - new visit form</title>
+	</head>
+	
+	<p>Canvas:</p>
+	<form method="post" action="">
+		{% csrf_token %}
+		{{ form.as_p }}
+		<button type="submit">Save Visit</button>
+	</form>
+	
+	<a href="{% url 'index' %}">
+		Back to home
+	</a>
+</html>

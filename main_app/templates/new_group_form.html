@@ -1,0 +1,21 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+<link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Study Design - new group form</title>
+	</head>
+	
+	<form method="post" action="{% url 'main_app_new_group' %}">
+		{{ form }}
+		
+		{% csrf_token %}
+		<button type="submit">Save Group</button>
+	</form>
+	
+	<a href="{% url 'index' %}">
+		Back to home
+	</a>
+</html>

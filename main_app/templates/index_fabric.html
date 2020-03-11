@@ -1,0 +1,594 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+<script src="{% static 'jquery-3.4.1.min.js' %}"></script>
+<script src="{% static 'fabric.min.js' %}"></script>
+<script src="{% static 'FileSaver.min.js' %}"></script>
+
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Study Design - fabric</title>
+	</head>
+	<body>
+	
+	<img id="dose" style="display:none"
+	src="{% static '/images/dose2.jpg' %}" alt="Visit">
+
+	<img id="sample_bss" style="display:none"
+	src="{% static '/images/bss.png' %}" alt="bss">
+	
+	<img id="sample_bsi" style="display:none"
+	src="{% static '/images/bsi.png' %}" alt="bsi">
+
+	<img id="sample_usp" style="display:none"
+	src="{% static '/images/usp.png' %}" alt="usp">
+	
+	<img id="sample_uss" style="display:none"
+	src="{% static '/images/uss.png' %}" alt="uss">
+	
+	<img id="sample1" style="display:none"
+	src="{% static '/images/sample.png' %}" alt="bss">
+	
+	<img id="sample2" style="display:none"
+	src="{% static '/images/sample2.png' %}" alt="bsi">
+
+	<img id="sample3" style="display:none"
+	src="{% static '/images/sample3.png' %}" alt="usp">
+	
+	<img id="sample4" style="display:none"
+	src="{% static '/images/sample4.png' %}" alt="uss">
+	
+	<img id="sample5" style="display:none"
+	src="{% static '/images/sample.png' %}" alt="uss">
+	
+	<img id="rand" style="display:none"
+	src="{% static '/images/randomization.png' %}" alt="randomization">
+	
+	<img id="review" style="display:none"
+	src="{% static '/images/review.png' %}" alt="review">
+	
+	<p>Study design: fabric </p>
+
+	<input id="grid" type="button" value="Grid" />
+	<input id="ungrid" type="button" value="Ungrid" />
+	<div class="canvas_container"> 
+	<canvas id="myCanvas" class="canvas__canvas" width="1200" height="297" style="border:1px solid #d3d3d3;">
+	Your browser does not support the HTML5 canvas tag.
+	</canvas>
+	<input id="getImage" type="button" value="Save as image" />
+	</div>
+	<table class="table table-striped table-sm" id="my_study">
+        <thead><B>Study</B>
+            <tr>
+                <th>name</th>
+                <th>Step wise study?</th>
+                <th>Number of steps</th>
+                <th>randyn</th>
+                <th>randq</th>		
+            </tr>
+        </thead>
+        <tbody>
+        {% for study in study %}
+        <tr>
+            <td>{{study.name}}</td>
+            <td>{{study.stepwise}}</td>
+            <td>{{study.no_steps}}</td>
+            <td>{{study.randyn}}</td>
+            <td>{{study.randq}}</td>
+			<td><a href="{% url 'edit_study' pk=study.pk %}"><button class="btn btn-warning">Edit</button></a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+	<a href="{% url 'main_app_new_group' %}">
+		Submit a new group
+	</a>
+	<p></p>
+	<table class="table table-striped table-sm" id="my_study">
+        <thead><B>Applicable Groups</B>
+            <tr>
+                <th>Group Name</th>
+                <th>Group set</th>
+                <th>Number of Participants</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for group in groups %}
+        <tr>
+            <td>{{group.name}}</td>
+            <td>{{group.groupset}}</td>
+            <td>{{group.No_subjects}}</td>
+			<td><a href="{% url 'edit_group' pk=group.pk %}"><button class="btn btn-warning">Edit</button></a></td>
+			<td><a href="{% url 'remove_group' pk=group.pk %}"><button class="btn btn-danger">Delete</button></a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+	<a href="{% url 'main_app_new_sampletp' %}">
+		Submit a new sampletype
+	</a>
+	<p></p>
+	<table class="table table-striped table-sm" id="my_study">
+        <thead><B>Applicable Sampletypes</B>
+            <tr>
+                <th>name</th>
+                <th>full name</th>			
+            </tr>
+        </thead>
+        <tbody>
+        {% for sampletype in sampletypes %}
+        <tr>
+            <td>{{sampletype.name}}</td>
+            <td>{{sampletype.full_name}}</td>
+			<td><a href="{% url 'edit_sampletp' pk=sampletype.pk %}"><button class="btn btn-warning">Edit</button></a></td>
+			<td><a href="{% url 'remove_sampletp' pk=sampletype.pk %}"><button class="btn btn-danger">Delete</button></a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+	<a href="{% url 'main_app_new_visit' %}">
+		Submit a new visit
+	</a>
+	<p></p>
+	<table class="table table-striped table-sm" id="my_visits">
+        <thead><B>Visits</B>
+            <tr>
+				<th>Order</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Timepoint</th>
+                <th>Has Vaccination</th>
+                <th>Group set</th>
+                <th>SampleType</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for visit in visits %}
+        <tr>
+            <td>{{visit.order}}</td>
+            <td>{{visit.type}}</td>
+            <td>{{visit.name}}</td>
+            <td>{{visit.timepoint}}</td>
+            <td>{{visit.has_vac}}</td>
+            <td>{{visit.groupset}}</td>
+            <td>{{ visit.SampleType.all|join:", " }}</td>
+			<td><a href="{% url 'edit_visit' pk=visit.pk %}"><button class="btn btn-warning">Edit</button></a></td>
+			<td><a href="{% url 'remove_visit' pk=visit.pk %}"><button class="btn btn-danger">Delete</button></a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+	<script>
+	
+			window.onload = function() {
+			 this.canvas = new fabric.Canvas('myCanvas', {
+			   selection: false,
+			   preserveObjectStacking: true
+			 });	
+	
+			/* might want to introduce grid functionality to be able to move object
+		
+			var grid = 20;
+			for (var i = 0; i < (800 / grid); i++) {
+			  canvas.add(new fabric.Line([ i * grid, 0, i * grid, 800], { stroke: '#ccc', selectable: false }));
+			  canvas.add(new fabric.Line([ 0, i * grid, 800, i * grid], { stroke: '#ccc', selectable: false }))
+			}
+
+			canvas.on('object:moving', function(options) { 
+			  options.target.set({
+				left: Math.round(options.target.left / grid) * grid,
+				top: Math.round(options.target.top / grid) * grid
+			  });
+			});
+			
+			*/
+
+			var xpos_vis = 250;
+			var xpos_end = xpos_vis +  ({{ visitcount }} * 100);
+			var ystartpos = 0;	
+			
+			/* if study is randomized move the ystartpos down */
+			
+			{% for study in study %}
+				{% if study.randyn == True %}
+					ystartpos = ystartpos + 75;
+				{% endif %}	
+			{% endfor %}
+			
+			/* create sampletypelist array, to be able to loop over the available sampletypes */
+			
+			var sampletypelist = [];
+			
+			{% for sampletype in sampletypes.all %}
+				sampletypelist.push("{{sampletype.name}}");
+			{% endfor %}	
+			
+			/* define the y position for the samples */
+			
+			var samplestartpos = ystartpos + 220;
+			var samplepos2 = samplestartpos + 25;
+			var samplepos3 = samplepos2 + 25;
+			var samplepos4 = samplepos3 + 25;
+			var samplepos5 = samplepos4 + 25;
+			
+			/* define the size of the screen (needs to be properly updated based on the number of sampletypes still */
+			
+			canvas.setWidth(/*xpos_end*/2000);
+			canvas.setHeight(/*(samplepos4 + 200)*/500);
+
+			/* create the variables for the images */			
+			var ctx = canvas.getContext("2d");				
+			var img_vis = document.getElementById("Visit");
+			var img_uss = document.getElementById("sample_uss");
+			var img_bss = document.getElementById("sample_bss");
+			var img_bsi = document.getElementById("sample_bsi");
+			var img_usp = document.getElementById("sample_usp");
+			var img_rand = document.getElementById("rand");
+			var img_review = document.getElementById("review");
+
+			/* add text that will always be available, independent of the scenario */
+			
+			var text_day = new fabric.IText('Day', { 
+			left: 30, 
+			top: ystartpos+25,
+			fontFamily: 'Arial',
+			fontSize: '20',
+			textAlign: 'center'
+			});
+			canvas.add(text_day);
+			var text_visit = new fabric.IText('Visit', { 
+			left: 30, 
+			top: ystartpos+50,
+			fontFamily: 'Arial',
+			fontSize: '20',
+			textAlign: 'center'
+			});
+			canvas.add(text_visit);
+			
+			/* add randomization figure if study is randomized */			
+			
+			{% for study in study %}
+				{% if study.randyn == True %}
+					var rect = new fabric.Rect({
+					  fill: '#eef',
+					  width: 100,
+					  height: 40,					  
+					  originX: 'center',
+					  originY: 'center'
+					});
+					var text = new fabric.Text("Randomization", {
+					  fontFamily: 'Arial',
+					  fontSize: 12,
+					  originX: 'center',
+					  originY: 'bottom'
+					});
+					var text2 = new fabric.Text("({{ study.randq}})", {
+					  fontFamily: 'Arial',
+					  fontSize: 12,
+					  originX: 'center',
+					  originY: 'top'
+					});
+				
+					var group = new fabric.Group([ rect, text, text2], {
+					  left: xpos_vis,
+					  top: 20,
+					  originX: 'center',
+					});	
+					canvas.add(group);					
+					var line = new fabric.Line([xpos_vis,60,xpos_vis,100],
+					{
+					strokeWidth: 1,
+					fill: 'black',
+					stroke: 'black',
+					OriginX: 'Center',
+					OriginY: 'Center'
+					});
+					canvas.add(line);					
+
+					
+				{% endif %}	
+			{% endfor %}
+			
+			/* define the sample types at the bottom of the canvas (y location needs to be properly updated based on the number of sampletypes still) */
+			
+			var studysamples = [];
+			var studysamplesfull = [];
+				{% for sampletype in sampletypes.all %}
+					studysamples.push("{{sampletype.name}}");
+					studysamplesfull.push("{{sampletype.full_name}}");
+				{% endfor %}
+			
+			var xposstsamples = 10;
+			var yposstsamples = samplepos4 + 100;
+		
+			for (i = 0; i < studysamples.length; i++) {		
+				var circle = new fabric.Circle({
+				  radius: 18,
+				  fill: '#eef',
+				  scaleY: 0.5,
+				  originX: 'center',
+				  originY: 'center'
+				});
+
+				var text = new fabric.Text(studysamples[i], {
+				  fontFamily: 'Arial',
+				  fontSize: 12,
+				  originX: 'center',
+				  originY: 'center'
+				});
+
+				var group = new fabric.Group([ circle, text ], {
+				  left: xposstsamples + 28,
+				  top: yposstsamples +19,
+				});		
+				canvas.add(group);
+				var text_studysamplefull = new fabric.IText('= ' + studysamplesfull[i], { 
+				left: xposstsamples + 60, 
+				top: yposstsamples +22,
+				fontFamily: 'Arial',
+				fontSize: '10',
+				textAlign: 'center'				
+				});
+				var group2 = new fabric.Group([ group, text_studysamplefull ], {
+				  left: xposstsamples + 28,
+				  top: yposstsamples +19,
+				});	
+				canvas.add(group2);				
+				xposstsamples = xposstsamples + 200;	
+			}		
+			
+			/* add text for the group, the location should be dependent on the groupset */			
+			var ygrouppos = ystartpos + 100;
+			var ygroupset1 = ygrouppos;
+			var ygroupset2 = ygrouppos + 100;
+
+			{% for groupset in groupsets %}
+				{% for group in groups %}
+					if ({{groupset.name}} == {{group.groupset}}) {
+					var text_group = new fabric.IText("{{ group.name}} (N \u2245 {{ group.No_subjects}})", { 
+					left: 30, 
+					top: ygrouppos,
+					fontFamily: 'Arial',
+					fontSize: '12',
+					textAlign: 'center'				
+					});
+					canvas.add(text_group);
+					ygrouppos = ygrouppos + 15; 
+					console.log(ygrouppos);
+					}				
+				
+				{% endfor %}
+			ygrouppos = ygroupset2;
+			{% endfor %}		
+
+				
+				
+			/* add visit information, independent from groupset */			
+			var ygrouppos = ystartpos + 100;			
+
+			
+			{% for visit in visits %}
+			
+			/* add visitname and timepoint on top of the diagram */
+				var text_visit = new fabric.IText("{{ visit.name}}", { 
+				left: xpos_vis, 
+				top: ystartpos + 25,
+				fontFamily: 'Arial',
+				fontSize: '20',
+				textAlign: 'center',
+				originX: 'center'
+				});
+				canvas.add(text_visit);
+				var text_visit = new fabric.IText("{{ visit.timepoint}}", { 
+				left: xpos_vis, 
+				top: ystartpos + 50,
+				fontFamily: 'Arial',
+				fontSize: '20',
+				textAlign: 'center',
+				originX: 'center'
+				});
+				canvas.add(text_visit);
+
+				
+				
+			/* add samples selected per visit at the bottom of the diagram */	
+				var visitsamples = [];
+				{% for sampletype in visit.SampleType.all %}
+					visitsamples.push("{{sampletype.name}}");
+				{% endfor %}
+				
+				for (i = 0; i < visitsamples.length; i++) {		
+					if (visitsamples[i] == sampletypelist[0]) {
+						var circle = new fabric.Circle({
+						  radius: 18,
+						  fill: '#eef',
+						  scaleY: 0.5,
+						  originX: 'center',
+						  originY: 'center'
+						});
+
+						var text = new fabric.Text(sampletypelist[0], {
+						  fontFamily: 'Arial',
+						  fontSize: 12,
+						  originX: 'center',
+						  originY: 'center'
+						});
+
+						var group = new fabric.Group([ circle, text ], {
+						  left: xpos_vis,
+						  top: samplestartpos,
+						  originX: 'center',
+						  originY: 'center'
+						});	
+						
+						canvas.add(group);	
+					}
+					if (visitsamples[i] == sampletypelist[1]) {
+						var circle = new fabric.Circle({
+						  radius: 18,
+						  fill: '#eef',
+						  scaleY: 0.5,
+						  originX: 'center',
+						  originY: 'center'
+						});
+
+						var text = new fabric.Text(sampletypelist[1], {
+						  fontFamily: 'Arial',
+						  fontSize: 12,
+						  originX: 'center',
+						  originY: 'center'
+						});
+
+						var group = new fabric.Group([ circle, text ], {
+						  left: xpos_vis,
+						  top: samplepos2,
+						  originX: 'center',
+						  originY: 'center'
+						});	
+						
+						canvas.add(group);	
+					}
+					if (visitsamples[i] == sampletypelist[2]) {
+						var circle = new fabric.Circle({
+						  radius: 18,
+						  fill: '#eef',
+						  scaleY: 0.5,
+						  originX: 'center',
+						  originY: 'center'
+						});
+
+						var text = new fabric.Text(sampletypelist[2], {
+						  fontFamily: 'Arial',
+						  fontSize: 12,
+						  originX: 'center',
+						  originY: 'center'
+						});
+
+						var group = new fabric.Group([ circle, text ], {
+						  left: xpos_vis,
+						  top: samplepos3,
+						  originX: 'center',
+						  originY: 'center'
+						});	
+						
+						canvas.add(group);	
+					}
+					if (visitsamples[i] == sampletypelist[3]) {
+						var circle = new fabric.Circle({
+						  radius: 18,
+						  fill: '#eef',
+						  scaleY: 0.5,
+						  originX: 'center',
+						  originY: 'center'
+						});
+
+						var text = new fabric.Text(sampletypelist[3], {
+						  fontFamily: 'Arial',
+						  fontSize: 12,
+						  originX: 'center',
+						  originY: 'center'
+						});
+
+						var group = new fabric.Group([ circle, text ], {
+						  left: xpos_vis,
+						  top: samplepos4,
+						  originX: 'center',
+						  originY: 'center'
+						});	
+						
+						canvas.add(group);	
+					}
+				}
+			xpos_vis = xpos_vis + 100;
+			{% endfor %}
+
+			var xpos_vis = 250;
+			/* add objects for the visit, dependent on the groupset */			
+			var yvisitpos = ystartpos + 80;		
+			var img_dose = document.getElementById('dose');
+			var i = 1;
+			
+			{% for groupset in groupsets %}
+				{% for visit in visits %}
+					if ({{groupset.name}} == {{visit.groupset}}) {
+						/* if the visit has vaccination, add vaccination image */
+						
+						{% if visit.has_vac %}
+						
+							var imgInstance = new fabric.Image(img_dose, {
+							  left: xpos_vis,
+							  top: yvisitpos,
+							  originX: 'center',
+							});
+							canvas.add(imgInstance);
+						{% endif %}
+					
+						/* if the type of the visit is not visit then add a figure to show the type */
+						{% if visit.type|cut:" " != "Visit" %}
+							var circle = new fabric.Circle({
+							  radius: 25,
+							  fill: '#aaf',
+							  scaleY: 0.5,
+							  originX: 'center',
+							  originY: 'center'
+							});	
+							
+							var text = new fabric.Text("{{ visit.type}}", {
+							  fontFamily: 'Arial',
+							  fontSize: 12,
+							  originX: 'center',
+							  originY: 'center'
+							});
+							
+							var group = new fabric.Group([ circle, text ], {
+							  left: xpos_vis,
+							  top: yvisitpos + 10,
+							  originX: 'center',
+							});	
+							canvas.add(group);
+						/* add arrow to link to previous visit */
+
+							var triangle = new fabric.Triangle({
+								width: 10, 
+								height: 15, 
+								fill: 'black', 
+								left: xpos_vis-24 , 
+								top: yvisitpos + 16,
+								angle: 90
+							});
+
+							var line = new fabric.Line([50, 100, 90, 100], {
+								left: xpos_vis - 70,
+								top: yvisitpos + 20,
+								stroke: 'black'
+							});
+
+							var arrow = new fabric.Group([line, triangle], { 
+								originX: 'center',
+								});
+							canvas.add(arrow);						
+
+						{% endif %}		
+					xpos_vis = xpos_vis + 100; 
+					}
+
+				{% endfor %}
+				xpos_vis = 250;
+				yvisitpos = ystartpos + 160;
+			{% endfor %}	
+
+
+		};
+
+		$("#getImage").click(function(){
+			canvas.toCanvasElement().toBlob(function(blob){
+				saveAs(blob, "myIMG.png");
+			});
+		});	
+		
+		
+		
+	</script>
+</html>
+
